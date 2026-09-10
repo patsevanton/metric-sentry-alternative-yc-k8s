@@ -37,6 +37,11 @@ observability-платформу на Rust — в Kubernetes на Yandex Cloud �
 3. `kubectl apply -f cluster-issuer.yaml` — ClusterIssuer `letsencrypt-prod`.
 4. `helm install metric oci://ghcr.io/biosshot/charts/metric --version 0.1.6 -n metric -f metric-values.yaml` — Metric.
 5. Извлечь `METRIC_BOOTSTRAP_TOKEN` из логов и пройти first setup.
+   Токен генерирует само приложение Metric при первом запуске (мы его не создаём):
+   ```bash
+   kubectl --namespace metric logs deployment/metric --container metric
+   ```
+   Найти строку `METRIC_BOOTSTRAP_TOKEN=` и скопировать её значение (держать в тайне).
 
 ## CRITICAL RULES — ОБЯЗАТЕЛЬНО
 

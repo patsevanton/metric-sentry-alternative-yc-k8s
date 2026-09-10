@@ -176,7 +176,8 @@ kubectl --namespace metric port-forward service/metric 4001:4001
 # http://localhost:4001
 ```
 
-Извлеките одноразовый bootstrap-токен из логов контейнера Metric:
+Извлеките одноразовый bootstrap-токен из логов контейнера Metric (токен генерирует
+само приложение Metric при первом запуске — мы его не создаём):
 
 ```bash
 kubectl --namespace metric logs deployment/metric --container metric
