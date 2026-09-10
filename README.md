@@ -211,6 +211,13 @@ kubectl --namespace metric logs deployment/metric --container metric
 Sentry.init({ dsn: "https://<key>@metric.example.com/<project_id>" });
 ```
 
+Формат DSN — `https://<PROJECT_KEY>@<host>/<PROJECT_ID>`:
+
+- `<PROJECT_KEY>` — ключ проекта, авторизует отправку событий именно в этот проект.
+  Это **не** личный токен входа и **не** auth token организации.
+- `<PROJECT_ID>` — числовой идентификатор проекта.
+
+Разделять DSN не нужно: вставляйте его целиком в `Sentry.init({ dsn: "..." })`.
 Подробнее: [SDK setup](https://biosshot.github.io/metric/sdk-setup).
 
 ### Пример: Android-приложение (Sentry Android SDK)
