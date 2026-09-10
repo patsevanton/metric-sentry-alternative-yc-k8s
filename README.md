@@ -267,9 +267,7 @@ mapping-файл в Metric — по нему Symbolicator деобфусциру
 > `SENTRY_PROJECT`. Для Android-демо из Шага 5 назовите проект `android-demo`, чтобы
 > совпало с примером `export SENTRY_PROJECT=android-demo`.
 
-Где взять auth token: **Settings → Organization** (внизу секция **API tokens**,
-маршрут `/settings/organization`) → создать токен с профилем **Releases**
-(скоупы `release:read`, `release:write`). Токен показывается один раз — держите в тайне.
+Где взять auth token: **Settings → Organization**, внизу секция **API tokens** → создать токен с профилем **Releases** или по русски `Релизы и развёртывания` (скоупы `release:read`, `release:write`). Токен показывается один раз — держите в тайне.
 
 ```bash
 export SENTRY_AUTH_TOKEN=<auth-token>
@@ -283,23 +281,6 @@ export SENTRY_URL="https://$METRIC_FQDN"
 В логе сборки задача `uploadSentryProguardMappingsRelease` загрузит mapping (без токена —
 `skipping upload`). Ограничение: Metric поддерживает базовый mapping/source maps через
 Symbolicator (профили Medium/High); «Advanced ProGuard processing» не входит в scope.
-
-## Обновление Metric
-
-```bash
-helm upgrade metric oci://ghcr.io/biosshot/charts/metric \
-  --version <new-metric-version> --namespace metric \
-  -f metric-values.yaml --wait --timeout 20m
-```
-
-- Обновления используют `Recreate` и ровно одну реплику; во время миграции `/live`
-  возвращает 200, а `/ready` — 503.
-- Миграции схемы MongoDB выполняются автоматически и необратимы: **не используйте**
-  `helm rollback` через поколения схемы. Helm может откатить манифесты, но не миграции БД.
-- Перед обновлением сделайте бэкап MongoDB, S3 и Secret `metric-secrets` вместе.
-
-Подробнее: [Update Metric](https://biosshot.github.io/metric/upgrading),
-[backup/restore](https://biosshot.github.io/metric/backup-restore).
 
 ## Конфигурация
 
@@ -319,16 +300,6 @@ config:
 > в `config`.
 
 Полный список настроек: [Configuration](https://biosshot.github.io/metric/configuration).
-
-## Удаление
-
-```bash
-helm uninstall metric --namespace metric --wait
-```
-
-PVC MongoDB и Secret-ы сохраняются (аннотация `helm.sh/resource-policy: keep`).
-Helm release history — не бэкап данных. Не удаляйте namespace `metric`, иначе
-Kubernetes удалит PVC и Secret несмотря на retention-аннотации Helm.
 
 ## Полезные ссылки
 
