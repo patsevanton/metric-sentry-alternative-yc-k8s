@@ -197,7 +197,7 @@ kubectl --namespace metric logs deployment/metric --container metric
 
 | Поле first setup | Что это | Соответствие в переменных SDK |
 |------------------|---------|-------------------------------|
-| **Организация** (имя) | Название организации, из него образуется **slug** | `SENTRY_ORG` (slug организации, например `myorg`) |
+| **Организация** (имя) | Название организации, из него образуется **slug**; значение **важно запомнить** — оно станет `SENTRY_ORG` | `SENTRY_ORG` (slug организации, например `myorg`) |
 | **Идентификатор** (organization ID) | Показывается после setup; нужен только при **входе** (email + пароль + org ID) | ничему из `SENTRY_*` — отдельное значение |
 | **Проект** (slug) | Создаётся на шаге «Create your first project» | `SENTRY_PROJECT` (slug проекта, например `android-demo`) |
 | — (создаётся в настройках) | Auth token организации | `SENTRY_AUTH_TOKEN` |
@@ -250,6 +250,10 @@ mapping-файл в Metric — по нему Symbolicator деобфусциру
 > `SENTRY_ORG` — это **slug** организации, а не «Идентификатор» (organization ID) из окна
 > first setup. Organization ID нужен только для входа в UI (email + пароль + org ID) и
 > ни одной переменной SDK не соответствует.
+>
+> Имя, введённое в поле **Организация** при first setup, образует slug организации —
+> запишите его: это значение вы укажете в `SENTRY_ORG`. Используйте латиницу/slag-стиль,
+> если хотите точное значение (пробелы и спецсимволы преобразуются в slug).
 
 Где взять auth token: **Settings → Organization** (внизу секция **API tokens**,
 маршрут `/settings/organization`) → создать токен с профилем **Releases**
