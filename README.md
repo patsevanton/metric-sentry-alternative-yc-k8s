@@ -203,6 +203,57 @@ Sentry.init({ dsn: "https://<key>@metric.example.com/<project_id>" });
 
 Подробнее: [SDK setup](https://biosshot.github.io/metric/sdk-setup).
 
+### Пример: Android-приложение (Sentry Android SDK)
+
+Демонстрационное приложение, раскрывающее возможности Metric через Sentry Android SDK,
+находится в отдельном репозитории
+[metric-android-sample](https://github.com/patsevanton/metric-android-sample):
+
+- ошибки и крэши (`captureException`, необработанные крэши, уровни);
+- трейсы/performance (транзакции, спаны, HTTP-запросы через OkHttp);
+- релизы и сессии;
+- деобфускация стектрейсов через ProGuard-маппинг (Sentry Gradle Plugin);
+- breadcrumbs, теги, extra, user, scope;
+- user feedback и attachments;
+- продвинутые механики (fingerprint, beforeSend и т.д.).
+
+Приложение использует **Sentry Android SDK 8.50.1** (в
+[SDK compatibility](https://biosshot.github.io/metric/compatibility) Metric 0.1.6
+протестирован `sentry-java` 8.50.1 — тот же код, что и Android SDK). DSN вводится в UI
+и сохраняется локально; профилирование не используется (Metric 0.1.6 его не поддерживает).
+
+### Загрузка ProGuard-маппинга (деобфускация релизов)
+
+Sentry Android Gradle Plugin автоматически создаёт release и загружает ProGuard/R8
+mapping-файл в Metric — по нему Symbolicator деобфусцирует стектрейсы релизных сборок.
+
+Плагину нужны четыре значения (задаются через переменные окружения либо `sentry.properties`,
+который **не коммитится**):
+
+| Переменная | Значение |
+|-----------|----------|
+| `SENTRY_AUTH_TOKEN` | Auth token организации (секрет) |
+| `SENTRY_ORG` | slug организации (например `myorg`) |
+| `SENTRY_PROJECT` | slug проекта (например `android-demo`) |
+| `SENTRY_URL` | `https://metric.<...>.sslip.io` |
+
+Где взять auth token: **Settings → Organization** (внизу секция **API tokens**,
+маршрут `/settings/organization`) → создать токен с профилем **Releases**
+(скоупы `release:read`, `release:write`). Токен показывается один раз — держите в тайне.
+
+```bash
+export SENTRY_AUTH_TOKEN=<auth-token>
+export SENTRY_ORG=myorg
+export SENTRY_PROJECT=android-demo
+export SENTRY_URL="https://$METRIC_FQDN"
+
+./gradlew assembleRelease
+```
+
+В логе сборки задача `uploadSentryProguardMappingsRelease` загрузит mapping (без токена —
+`skipping upload`). Ограничение: Metric поддерживает базовый mapping/source maps через
+Symbolicator (профили Medium/High); «Advanced ProGuard processing» не входит в scope.
+
 ## Обновление Metric
 
 ```bash
