@@ -267,7 +267,15 @@ mapping-файл в Metric — по нему Symbolicator деобфусциру
 > `SENTRY_PROJECT`. Для Android-демо из Шага 5 назовите проект `android-demo`, чтобы
 > совпало с примером `export SENTRY_PROJECT=android-demo`.
 
-Где взять auth token: **Settings → Organization**, внизу секция **API tokens** → создать токен с профилем **Releases** или по русски `Релизы и развёртывания` (скоупы `release:read`, `release:write`). Токен показывается один раз — держите в тайне.
+Где взять auth token: **Settings → Organization**, внизу секция **API tokens** → создать токен.
+Токен показывается один раз — держите в тайне.
+
+> **Важно про скоупы токена.** Токену для загрузки mapping-файла нужен скоуп
+> `debug_file:write`, а **не** `release:write`. Профиль **«Debug files»** (скоупы
+> `debug_file:read`, `debug_file:write`) подходит для `uploadSentryProguardMappingsRelease`.
+> Профиль **«Releases»** (`release:read`, `release:write`) загрузку mapping НЕ пропустит —
+> sentry-cli получит `403 request is forbidden` на `GET /api/0/organizations/<org>/chunk-upload/`.
+> Подробнее в разделе «Диагностика 403 при загрузке ProGuard/source maps» ниже.
 
 ```bash
 export SENTRY_AUTH_TOKEN=<auth-token>
@@ -281,6 +289,43 @@ export SENTRY_URL="https://$METRIC_FQDN"
 В логе сборки задача `uploadSentryProguardMappingsRelease` загрузит mapping (без токена —
 `skipping upload`). Ограничение: Metric поддерживает базовый mapping/source maps через
 Symbolicator (профили Medium/High); «Advanced ProGuard processing» не входит в scope.
+
+### Диагностика 403 при загрузке ProGuard/source maps
+
+При `./gradlew assembleRelease` могут падать две задачи Sentry Gradle Plugin:
+
+| Задача | Endpoint Metric | Требуемый скоуп токена |
+|--------|-----------------|------------------------|
+| `uploadSentryProguardMappingsRelease` | `GET /api/0/organizations/<org>/chunk-upload/` (chunk-upload/DIF flow) | `debug_file:write` |
+| `sentryUploadSourceBundleRelease` | `POST /api/0/organizations/<org>/artifactbundle/assemble/` | `artifact:write` |
+
+Обе при нехватке прав возвращают HTTP **403** `{"error":{"code":"forbidden","message":"request is forbidden"}}`
+(403, а не 401 — токен валиден, но не хватает скоупов). Убедиться можно так:
+
+```bash
+SENTRY_LOG_LEVEL=debug \
+SENTRY_AUTH_TOKEN=<auth-token> \
+SENTRY_ORG=myorg \
+SENTRY_PROJECT=android-demo \
+SENTRY_URL="https://$METRIC_FQDN" \
+./app/build/tmp/sentry-cli-*.exe upload-proguard --log-level=debug app/build/outputs/mapping/release/mapping.txt
+```
+
+Что делать:
+
+1. **ProGuard mapping** — создайте токен профиля **«Debug files»** (`debug_file:read`,
+   `debug_file:write`) вместо «Releases». Этого достаточно для
+   `uploadSentryProguardMappingsRelease`.
+2. **Source bundle** — задача `sentryUploadSourceBundleRelease` требует скоуп
+   `artifact:write`, но в UI Metric (`Settings → Organization → API tokens`) **ни один
+   профиль токена не выдаёт `artifact:write`** (есть только `artifact:read` в профиле
+   «Read-only»). Это ограничение Metric 0.1.6 — см. issue. Пока два пути:
+   - отключить `includeSourceContext` (или `autoUploadSourceContext`) в секции `sentry { }`
+     в `app/build.gradle.kts`, тогда задача загрузки source bundle не запускается;
+   - либо доработать Metric (добавить профиль токена с `artifact:write`).
+
+Оба дефекта (неверный профиль в README и невозможность выдать `artifact:write` через UI)
+описаны в issue `issue-source-bundle-and-proguard-token-scopes.md` в корне репозитория.
 
 ## Конфигурация
 
