@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: metric-secrets
+  namespace: metric
 type: Opaque
 stringData:
   mongo-password: ${mongo_password}
