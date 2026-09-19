@@ -26,7 +26,7 @@ Traefik, cert-manager для HTTPS, MongoDB и Metric из официально�
 
 | Компонент | Технология | Namespace | Назначение |
 |-----------|-----------|-----------|------------|
-| Metric | Helm chart `metric` v0.1.6 | `metric` | Приложение (Rust binary + UI) |
+| Metric | Helm chart `metric` v0.1.7 | `metric` | Приложение (Rust binary + UI) |
 | MongoDB | StatefulSet из Helm-чарта Metric | `metric` | База данных |
 | Symbolicator | Deployment из Helm-чарта Metric (профиль medium) | `metric` | Символизация нативных крэшей / source maps |
 | BlobStore | Yandex Object Storage (S3) | — (внешний) | Артефакты: debug-файлы, source maps |
@@ -134,14 +134,14 @@ kubectl get clusterissuer letsencrypt-prod
 ### Helm-чарт Metric
 
 Чарт публикуется как OCI-пакет. Версия чарта, версия приложения и тег образа всегда
-совпадают: чарт **0.1.6** = Metric **0.1.6**.
+совпадают: чарт **0.1.7** = Metric **0.1.7**.
 
 Terraform уже сгенерировал `metric-values.yaml` из шаблона `metric-values.yaml.tpl`
 (с подставленным доменом, S3-endpoint и именем бакета).
 
 ```bash
 helm install metric oci://ghcr.io/biosshot/charts/metric \
-  --version 0.1.6 --namespace metric \
+  --version 0.1.7 --namespace metric \
   -f metric-values.yaml \
   --wait --timeout 10m
 ```
@@ -235,9 +235,9 @@ Sentry.init({ dsn: "https://<key>@metric.example.com/<project_id>" });
 - продвинутые механики (fingerprint, beforeSend и т.д.).
 
 Приложение использует **Sentry Android SDK 8.50.1** (в
-[SDK compatibility](https://biosshot.github.io/metric/compatibility) Metric 0.1.6
+[SDK compatibility](https://biosshot.github.io/metric/compatibility) Metric 0.1.7
 протестирован `sentry-java` 8.50.1 — тот же код, что и Android SDK). DSN вводится в UI
-и сохраняется локально; профилирование не используется (Metric 0.1.6 его не поддерживает).
+и сохраняется локально; профилирование не используется (Metric 0.1.7 его не поддерживает).
 
 ### Загрузка ProGuard-маппинга (деобфускация релизов)
 
@@ -319,7 +319,7 @@ SENTRY_URL="https://$METRIC_FQDN" \
 2. **Source bundle** — задача `sentryUploadSourceBundleRelease` требует скоуп
    `artifact:write`, но в UI Metric (`Settings → Organization → API tokens`) **ни один
    профиль токена не выдаёт `artifact:write`** (есть только `artifact:read` в профиле
-   «Read-only»). Это ограничение Metric 0.1.6 — см. issue. Пока два пути:
+   «Read-only»). Это ограничение Metric 0.1.7 — см. issue. Пока два пути:
    - отключить `includeSourceContext` (или `autoUploadSourceContext`) в секции `sentry { }`
      в `app/build.gradle.kts`, тогда задача загрузки source bundle не запускается;
    - либо доработать Metric (добавить профиль токена с `artifact:write`).

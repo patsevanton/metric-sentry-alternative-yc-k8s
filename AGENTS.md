@@ -10,7 +10,7 @@ observability-платформу на Rust — в Kubernetes на Yandex Cloud �
 
 | Компонент | Технология | Namespace | Где управляется |
 |-----------|-----------|-----------|-----------------|
-| Metric | Helm chart `metric` v0.1.6 (OCI) | `metric` | `metric-values.yaml.tpl`, `ip-dns.tf` |
+| Metric | Helm chart `metric` v0.1.7 (OCI) | `metric` | `metric-values.yaml.tpl`, `ip-dns.tf` |
 | MongoDB | StatefulSet из чарта Metric | `metric` | `metric-values.yaml.tpl` |
 | Symbolicator | Deployment из чарта Metric (medium) | `metric` | `metric-values.yaml.tpl` |
 | BlobStore | Yandex Object Storage (S3) | — (внешний) | `s3.tf` |
@@ -35,7 +35,7 @@ observability-платформу на Rust — в Kubernetes на Yandex Cloud �
    а также рендерит `metric-values.yaml`, `metric-secrets.yaml`, `secret_for_bucket.yaml`.
 2. `kubectl create namespace metric` + `kubectl apply -f metric-secrets.yaml` — Secret.
 3. `kubectl apply -f cluster-issuer.yaml` — ClusterIssuer `letsencrypt-prod`.
-4. `helm install metric oci://ghcr.io/biosshot/charts/metric --version 0.1.6 -n metric -f metric-values.yaml` — Metric.
+4. `helm install metric oci://ghcr.io/biosshot/charts/metric --version 0.1.7 -n metric -f metric-values.yaml` — Metric.
 5. Извлечь `METRIC_BOOTSTRAP_TOKEN` из логов и пройти first setup.
    Токен генерирует само приложение Metric при первом запуске (мы его не создаём):
    ```bash

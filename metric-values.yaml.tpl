@@ -1,4 +1,4 @@
-# Metric v0.1.6 — Helm values, генерируется из metric-values.yaml.tpl через Terraform.
+# Metric v0.1.7 — Helm values, генерируется из metric-values.yaml.tpl через Terraform.
 # Профиль medium: Metric + MongoDB + Symbolicator, BlobStore на Yandex Object Storage (S3).
 profile: medium
 
